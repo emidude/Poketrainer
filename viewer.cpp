@@ -7,8 +7,17 @@ using namespace std;
 //#include "viewPortSize.h" <-this code probably wont help, you found it at
 //https://answers.unrealengine.com/questions/94342/how-to-get-current-screen-sizeresolution.html
 
-//start screen
-//draw outline?
+
+int main(){
+    //start screen
+    
+    cout<<"Riker: welcome to the enterprise poker game"<<endl;
+    
+    return 0;
+}
+
+
+
 //draw riker, worf, gordi and data on the sreen 
 //introductory information
 
@@ -50,30 +59,35 @@ using namespace std;
 
 //starting from the dealers left
 //int decision(){}
-//each player chooses between "stick" "fold" or "raise"
+//each player chooses between "stick" "fold" "raise" or "match bet"
 //this is decision is based on a function f(trueChances, bias value, int pot){ probably some form of multiplication }
 //if isRaise == false
     //if the function decision returns below a certain threshold the player will choose to "stick"
         //stick returns no money into the pot
     //if decision returns above a threshold the player will choose to "raise" by int raiseAmount:
-    //isRaise == true
+    //player.money -= raiseAmount;
+    //isRaise == true;
     //pot += raiseAmount;
     //turnNumber++;
+    //moneyDue += raiseAmount;
 
 //starting from the dealer + turnNumber
 //decision() is run for the next player
     //pot is updated
     //new trueOdds calculated
-    //
+    //input these into decision
+    //if (isRaise == true){ 
+    // return either matchbet, raise or fold depending on whether fn returns a number over a particular threshold }
+
 
     
 
 
-
+/*
 void updateGraphics(){
     
 }
 
 int main(){
     return 0;
-}
+}*/
