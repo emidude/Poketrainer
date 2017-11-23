@@ -11,7 +11,7 @@ using namespace std;
 int main(){
     //start screen
     
-    cout<<"Riker: welcome to the enterprise poker game"<<endl;
+    cout<<"Riker: gitwelcome to the enterprise poker game"<<endl;
     
     return 0;
 }
