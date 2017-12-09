@@ -62,6 +62,19 @@ public:
         this->number = number;
     }
 };
+int randomInt(int bottom, int top){
+    //returns a random number between bottom and top
+    
+    //THE CODE BELOW WAS TAKEN DIRECTLY FROM LAB 7 CW SHEET
+    //*I DID NOT WRITE ANY OF THE CODE IN THE AREA MARKED BETWEEN COMMENT LINES BELOW*
+    ////////////////////////////////////////////
+    std::random_device r;
+    std::default_random_engine e1(r());
+    std::uniform_int_distribution<int> uniform_dist(bottom, top);
+    int random = uniform_dist(e1);
+    return random;    
+    ////////////////////////////////////////////
+}
 
 class Deck{
 public:
@@ -78,9 +91,8 @@ public:
             for(int n = 0; n < numberOfNumbers; n++){
                 cardsInTheDeck[indexInPack] = new Card(s,n);
                 indexInPack++;
-//                 cout<<"index in pack = "<<indexInPack<<endl;
-//                 cout<<"suiut = "<<s<<endl;
-//                 cout<<"number = "<<n<<endl;
+  //               cout<<"index in pack = "<<indexInPack<<endl;
+  //               cout<<"suiut: = "<<s<<", "<<"number = "<<n<<endl;
             }
         }
     }
@@ -91,24 +103,75 @@ public:
         }
     }
     void shuffle(){
-        int tempArray[numberOfCardsInDeck];
+        Card** tempArray;
+        int orderArray[numberOfCardsInDeck];
+        int indexArray[numberOfCardsInDeck];
+        int rand;
+        int cardsRemaining = numberOfCardsInDeck;
+        for (int i = 0; i<numberOfCardsInDeck; i++){
+            indexArray[i] = i;
+        }
         
+        for (int i = 0; i<numberOfCardsInDeck; i++){
+            //pick a random card
+            rand = randomInt(0,cardsRemaining-1);
+            //put the chosen rand into the tempArray
+            orderArray[i] = indexArray[rand];
+            //move the entries from the indexArray along to remove chosen rand
+            for (int i = rand; i < cardsRemaining; i++ ){
+                indexArray[i] = indexArray[i+1];
+            }
+            //shorten indexArray
+            cardsRemaining--;
+            orderArray[cardsRemaining];
+        }
+            //check:
+            for(int i = 0; i<numberOfCardsInDeck; i++){
+                cout<<orderArray[i]<<" "<<flush;
+            }
+//             for(int i = 0; i <numberOfCardsInDeck; i++){
+//                 cout<<"printing index array"<<flush;
+//                 cout<<indexArray[i]<<" "<<flush;
+//             }
+            
+            
+            //copy cards in cardsInTheDeck to a new temporary array in the ordering from orderArray            
+            for (int i = 0 ; i< numberOfCardsInDeck; i++){
+                int location = orderArray[i];
+             //   cout<<location<<endl;
+               cout<< cardsInTheDeck[location]->number<<endl;
+           //     cout<< cardsInTheDeck[i]->number<<endl;
+               
+         //       cout<<"cards int he deck loc"<<card
+             //   Card tempCard = *cardsInTheDeck[location];
+              //  tempArray = {tempArray, cardsInTheDeck[location]};
+           //     tempArray[i] = tempCard;
+           //     delete tempCard;
+            }
+            
+//             //update cardsInTheDeck from the tempArray
+//             for(int i = 0; i < numberOfCardsInDeck; i++){
+//                 cardsInTheDeck[i] = tempArray[i];
+//             }
+            
+           
+            
+            
+            
+//             //copy cardsInTheDeck array to tempArray
+//             for(int i = 0; i < numberOfCardsInDeck; i++){
+//                 tempArray[i] = cardsInTheDeck[i];
+//             }
+//             
+//             //reorder the cards in the deck
+//             for (int i = 0; i < numberOfCardsInDeck; i++){
+//                 int position = indexArray[i];
+//                 cardsInTheDeck[i] = tempArray[position];
+//             }
     }
 };
 
-int randomInt(int bottom, int top){
-    //returns a random number between bottom and top
-    
-    //THE CODE BELOW WAS TAKEN DIRECTLY FROM LAB 7 CW SHEET
-    //*I DID NOT WRITE ANY OF THE CODE IN THE AREA MARKED BETWEEN COMMENT LINES BELOW*
-    ////////////////////////////////////////////
-    std::random_device r;
-    std::default_random_engine e1(r());
-    std::uniform_int_distribution<int> uniform_dist(bottom, top);
-    int random = uniform_dist(e1);
-    return random;    
-    ////////////////////////////////////////////
-}
+
 
 void reorderArray(int dealerNumIn, int numPlayersIn, Player* playerArrayIn[]){
     
@@ -203,8 +266,10 @@ int main(){
     //initialise Deck
     Deck d;
     
-    cout<<"suit "<<d.cardsInTheDeck[50]->suit<<endl;
+    //shuffle the deck
+    d.shuffle();
     
+    cout<<"check"<< d.cardsInTheDeck[0]->suit<<" "<<d.cardsInTheDeck[0]->number<<endl;
 }
 
 //questions - do you only have to delete stuff in the destructor when you declare things in the heap - Blah* b = new Blah(). what anbout declaring classes themselves in the heap?? 
