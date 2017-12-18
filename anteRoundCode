@@ -1,0 +1,22 @@
+// void anteRound(Player* playerArray[], int anteAmount, Player* human){
+//     for (int i = 0; i <numPlayers; i++){
+//      if (playerArray[i] != human){
+//         playerArray[i]->addMoney(-anteAmount);
+//         moneyInThePot += anteAmount;
+//         cout<<playerArray[i]->name<<"'s money is now:"<< playerArray[i]->getMoney() <<endl;
+//         }
+//         else {
+//             cout<<dealer<<": How much money do you want to put in for the ante?"<<endl;
+//             int anteUpdate;
+//             cin>>anteUpdate;
+//             while(anteUpdate<anteAmount){
+//                 cout<<"You have to put more than the current ante."<<endl;
+//                 cin>>anteUpdate;
+//             }
+//             anteAmount = anteUpdate;
+//             playerArray[i]->addMoney(-anteAmount);
+//         moneyInThePot += anteAmount;
+//         }
+//     
+//     }
+// }

@@ -14,14 +14,16 @@ class Card{
 public:
     int suit;
     int number;
+    int deckNumber; //number between 0-51. keeps track of suit and number for checking for straigh flush;
     string suitName;
     string numberName;
     string suitArray[4] = {"Hearts","Clubs","Diamonds","Spades"};
     string numberArray[52] = {"Ace","2","3","4","5","6","7","8","9","10","Jack","Queen","King"};
     Card(){}
-    Card(int suit, int number){
+    Card(int suit, int number, int deckNumber){
         this->suit = suit;
         this->number = number;
+        this->deckNumber = deckNumber;
         suitName = suitArray[suit];
         numberName = numberArray[number];
     }
@@ -53,7 +55,7 @@ public:
         //declare all the cards in the deck when the deck constuctor is called
         for(int s = 0; s < numberOfSuits; s++){
             for(int n = 0; n < numberOfNumbers; n++){
-                cardsInTheDeck[indexInPack] = Card(s,n);
+                cardsInTheDeck[indexInPack] = Card(s,n,indexInPack);
                 indexInPack++;
   //               cout<<"index in pack = "<<indexInPack<<endl;
   //               cout<<"suiut: = "<<s<<", "<<"number = "<<n<<endl;
@@ -119,7 +121,7 @@ class Player{
 private:
     //only the player is allowed to know what cards they have
     Card cardsInHand[2]; 
-    
+    string currentHand;
 public:
     string name;
     int numberOfCardsInHand;
@@ -175,6 +177,121 @@ public:
             cout<<cardsVisible[i].numberName<<" of "<<cardsVisible[i].suitName<<endl;
         }
     }
+ 
+    void orderVisibleCardsForStraight(){
+//         //check
+//         cout<<"before ordering"<<endl;
+//         for(int i =0; i<totalCardsVisible; i++){
+//             cout<<i<<" "<<cardsVisible[i].numberName<<" "<<cardsVisible[i].suitName<<endl;
+//         }
+        //ordering:        
+        int counter = 0;
+        while(counter < totalCardsVisible-1){
+            if (cardsVisible[counter].number > cardsVisible[counter+1].number){
+                //swap the 2 numbers
+                Card temp = cardsVisible[counter];
+                cardsVisible[counter] = cardsVisible[counter+1];
+                cardsVisible[counter+1] = temp;
+                //reset counter:
+                counter = 0;
+            }
+            else counter++;
+        }
+        
+        //check
+        cout<<"after ordering"<<endl;
+        for(int i =0; i<totalCardsVisible; i++){
+            cout<<i<<" "<<cardsVisible[i].numberName<<" "<<cardsVisible[i].suitName<<endl;
+        }
+    }
+    
+    void getCurrentHand(int numberOfCardsOnTheTable, int numberOfCardsInDeck, Card cardsOnTheTable[]){
+        
+        getVisibleCards(numberOfCardsOnTheTable, numberOfCardsInDeck, cardsOnTheTable);
+        
+        orderVisibleCardsForStraight();//change this to for sf
+        //straight flush?
+        int longestStringOfNumbers = 1;
+        int runTally =1;
+        for(int i = 0; i< totalCardsVisible-1; i++){
+            for(int j = 0; j < totalCardsVisible-1; j++){
+                if(((cardsVisible[i].deckNumber + 1 == cardsVisible[i+1].deckNumber) 
+                    || (((cardsVisible[i].deckNumber +1)%13 == 0)
+                        && (cardsVisible[i+1].deckNumber == cardsVisible[i].deckNumber - 12) //accoutingfor king-ace
+                    )
+                ) &&
+                    (cardsVisible[i+1].deckNumber %13 != 0) //so not crosing over suits
+                ){
+                    runTally++;
+                }
+            }
+            if (runTally>longestStringOfNumbers){
+                longestStringOfNumbers = runTally;
+            }
+        }
+        if (longestStringOfNumbers >=5){
+            currentHand = "straight flush";
+            cout<<"you have a "<<currentHand<<endl;
+        }
+        cout<<"longestStringOfNumbers "<<longestStringOfNumbers<<endl;
+        
+        //flush?
+        int highestSuitTally = 1;
+        for(int i = 0; i < totalCardsVisible; i++){
+            int suitTally = 1;
+            for (int j = 0; j < totalCardsVisible; j++){
+                if (cardsVisible[i].suit == cardsVisible[j].suit
+                    && (i != j)
+                ){
+                suitTally++;
+                }
+            }
+            if(suitTally > highestSuitTally){
+                highestSuitTally = suitTally;
+            } 
+        }
+        if(highestSuitTally >= 5){
+            cout<<"you have a flush!"<<endl;
+        }
+        
+        //straight?
+        orderVisibleCardsForStraight();
+        longestStringOfNumbers = 1;
+        runTally =1;
+        for(int i = 0; i< totalCardsVisible; i++){
+            for(int j = 0; j < totalCardsVisible; j++){
+               // if()
+                if(cardsVisible[i].number + 1 == cardsVisible[i+1].number) {
+                    cout<<"c1"<<cardsVisible[i].number<<endl;
+                    cout<<"c2"<<cardsVisible[i+1].number<<endl;
+                    runTally++;
+                }
+                else if(((cardsVisible[i].number +1)%13 == 0)
+                        && (cardsVisible[i+1].number == cardsVisible[i].number - 12)) //accoutingfor king-ace                    
+                {cout<<"ace? "<<cardsVisible[i+1].numberName<<endl;
+                cout<<"king? "<<cardsVisible[i].numberName<<endl;
+                    runTally++;
+                }
+                if (runTally>longestStringOfNumbers){
+                longestStringOfNumbers = runTally;
+            }
+            }
+            cout<<"runTally "<<runTally<<endl;
+            
+        }
+        if (longestStringOfNumbers >=5){
+            currentHand = "straight";
+        }
+        cout<<"straight max run lenght"<<longestStringOfNumbers<<endl;
+        ////////////
+        
+        
+        //order cards:
+        for(int i = 0; i < totalCardsVisible; i++){
+            
+        }
+        
+    }
     
     double calcOdds(int numberOfCardsNeededToMakeAHand, int numberOfOuts, int cardsUnseen){
         double odds = 1;
@@ -194,134 +311,136 @@ public:
     //GOOD ENOUGH IS GOOD ENOUGH SO JUST GET ON WITH IT.
     //IT MIGHT EVEN BE FUN 
     
-    double straightFlushOdds(){}
-    double fourOAKOdds(){}
-    double fullHouseOdds(){}
-    double flushOdds(){
-            //flush: //not the most efficient code but it works (actually this sentiment for everything)
+//     double straightFlushOdds(){}
+//     double fourOAKOdds(){}
+//     double fullHouseOdds(){}
+//     double flushOdds(){
+//             //flush: //not the most efficient code but it works (actually this sentiment for everything)
+//         
+//         int highestSuitTally = 0;
+//         for(int i = 0; i < totalCardsVisible; i++){
+//             int suitTally = 0;
+//             for (int j = 0; j < totalCardsVisible; j++){
+//                 if (cardsVisible[i].suit == cardsVisible[j].suit){
+//                 suitTally++;
+//                 }
+//             }
+//             if(suitTally > highestSuitTally){
+//                 highestSuitTally = suitTally;
+//             } 
+//         }
+//         cout<<"highestSuitTally"<<highestSuitTally<<endl;
+//         int numberOfCardsNeededToMakeAFlush = 5 - highestSuitTally;
+//         //how many cards are left in the deck of this suit?
+//         int numberOfFlushOuts = 13 - highestSuitTally;
+//         
+//         cout<<"numberOfFlushOuts"<<numberOfFlushOuts<<endl;
+//         return calcOdds(numberOfCardsNeededToMakeAFlush, numberOfFlushOuts, cardsUnseen);
+//     }
+//     double straightOdds(){}
+//     double threeOAKOdds(){}
+//     double twoPairOdds(){}
+//     double pairOdds(){}
+//     
+//       int numberCollectionsArray[2][2] = {{0,0},{0,0}}; //can hold a maximum of 2 different number collections of more than 1 number (ie, you cant have 3 or more sets of pairs from 7 cards)
+//         //this is a 2x2 array in the form:
+//         //highestNumberTally: {cardNumber,number of multiples of that card}
+//         //secondHighestNumberTally: {cardNumber, nmbr of multiples of that card}
         
-        int highestSuitTally = 0;
-        for(int i = 0; i < totalCardsVisible; i++){
-            int suitTally = 0;
-            for (int j = 0; j < totalCardsVisible; j++){
-                if (cardsVisible[i].suit == cardsVisible[j].suit){
-                suitTally++;
-                }
-            }
-            if(suitTally > highestSuitTally){
-                highestSuitTally = suitTally;
-            } 
-        }
-        cout<<"highestSuitTally"<<highestSuitTally<<endl;
-        int numberOfCardsNeededToMakeAFlush = 5 - highestSuitTally;
-        //how many cards are left in the deck of this suit?
-        int numberOfFlushOuts = 13 - highestSuitTally;
-        
-        cout<<"numberOfFlushOuts"<<numberOfFlushOuts<<endl;
-        return calcOdds(numberOfCardsNeededToMakeAFlush, numberOfFlushOuts, cardsUnseen);
-    }
-    double straightOdds(){}
-    double threeOAKOdds(){}
-    double twoPairOdds(){}
-    double pairOdds(){}
+//     void calculateMultiples(){
+//         int highestNumberTally = 1;
+//         int secondHighestNumberTally = 1;
+//         
+//         //calculate number of multiples there are of a card Number and put them in an array with that number
+//         for(int i = 0; i < totalCardsVisible; i++){
+//             int sameNumberTally = 1; //you start off with 1 card
+//             for (int j= 0; j<totalCardsVisible; j++){
+//                 if (cardsVisible[i].number ==cardsVisible[j].number &&
+//                     i != j //avoid pairing with yourself
+//                 ){
+//                     sameNumberTally++;
+//                 }
+//             }
+//             if (sameNumberTally > highestNumberTally){
+//                 
+//                 //move current highestNumberTally to secondHighestNumberTally
+//                 secondHighestNumberTally = highestNumberTally;
+//                 //move highestNumberTally array vals -> secondHighestNumberTally vals:
+//                 //update card number
+//                 numberCollectionsArray[1][0] = numberCollectionsArray[0][0];
+//                 //update number of cards for that number
+//                 numberCollectionsArray[1][1] = numberCollectionsArray[0][1];
+//                 
+//                 //update highestNumberTally 
+//                 highestNumberTally = sameNumberTally;
+//                 //update array row for highestNumberTally:
+//                 numberCollectionsArray[0][0] = cardsVisible[i].number;
+//                 numberCollectionsArray[0][1] = sameNumberTally;
+//             }
+//             
+//             else if (sameNumberTally > secondHighestNumberTally &&
+//                 //make sure not already highestNumberTally
+//                 numberCollectionsArray[0][0] != cardsVisible[i].number
+//             ){
+//                 secondHighestNumberTally = sameNumberTally;
+//                 numberCollectionsArray[1][0] = cardsVisible[i].number;
+//                 numberCollectionsArray[1][1] = sameNumberTally;
+//             }
+//             cout<<"sameNumberTally"<<sameNumberTally<<endl;
+//         }
+//         //check;
+//         for(int i = 0; i<2;i++){
+//         cout<<i<<"th card: "<<numberCollectionsArray[i][0]<<"  numberOfMultiples: "<<numberCollectionsArray[i][1]<<endl;
+//         }
+//     }
     
-      int numberCollectionsArray[2][2] = {{0,0},{0,0}}; //can hold a maximum of 2 different number collections of more than 1 number (ie, you cant have 3 or more sets of pairs from 7 cards)
-        //this is a 2x2 array in the form:
-        //highestNumberTally: {cardNumber,number of multiples of that card}
-        //secondHighestNumberTally: {cardNumber, nmbr of multiples of that card}
-        
-    void calculateMultiples(){
-        int highestNumberTally = 1;
-        int secondHighestNumberTally = 1;
-        
-        //calculate number of multiples there are of a card Number and put them in an array with that number
-        for(int i = 0; i < totalCardsVisible; i++){
-            int sameNumberTally = 1; //you start off with 1 card
-            for (int j= 0; j<totalCardsVisible; j++){
-                if (cardsVisible[i].number ==cardsVisible[j].number &&
-                    i != j //avoid pairing with yourself
-                ){
-                    sameNumberTally++;
-                }
-            }
-            if (sameNumberTally > highestNumberTally){
-                
-                //move current highestNumberTally to secondHighestNumberTally
-                secondHighestNumberTally = highestNumberTally;
-                //move highestNumberTally array vals -> secondHighestNumberTally vals:
-                //update card number
-                numberCollectionsArray[1][0] = numberCollectionsArray[0][0];
-                //update number of cards for that number
-                numberCollectionsArray[1][1] = numberCollectionsArray[0][1];
-                
-                //update highestNumberTally 
-                highestNumberTally = sameNumberTally;
-                //update array row for highestNumberTally:
-                numberCollectionsArray[0][0] = cardsVisible[i].number;
-                numberCollectionsArray[0][1] = sameNumberTally;
-            }
-            
-            else if (sameNumberTally > secondHighestNumberTally &&
-                //make sure not already highestNumberTally
-                numberCollectionsArray[0][0] != cardsVisible[i].number
-            ){
-                secondHighestNumberTally = sameNumberTally;
-                numberCollectionsArray[1][0] = cardsVisible[i].number;
-                numberCollectionsArray[1][1] = sameNumberTally;
-            }
-            cout<<"sameNumberTally"<<sameNumberTally<<endl;
-        }
-        //check;
-        for(int i = 0; i<2;i++){
-        cout<<i<<"th card: "<<numberCollectionsArray[i][0]<<"  numberOfMultiples: "<<numberCollectionsArray[i][1]<<endl;
-        }
-    }
-    //check if have a full house or any other paired combos:
-    //if you have 3OAK and 2OAK:
-    if ( (numberCollectionsArray[0][1] > 2||
-        numberCollectionsArray[1][1] > 2 ) 
-        && 
-        (numberCollectionsArray[0][1] >=2 &&
-        numberCollectionsArray[1][1] >= 2 ) ){
-            cout<<"you have a full house"<<endl;
-        }
+//     //check if have a full house or any other paired combos:
+//     //if you have 3OAK and 2OAK:
+//     if ( (numberCollectionsArray[0][1] > 2||
+//         numberCollectionsArray[1][1] > 2 ) 
+//         && 
+//         (numberCollectionsArray[0][1] >=2 &&
+//         numberCollectionsArray[1][1] >= 2 ) ){
+//             cout<<"you have a full house"<<endl;
+//         }
    // else if( (numberCollectionsArray[0][1]) == 2 )
     
     //now you have calcualted the multiples, 
     //calculate the odds for the hands that require multiples 
     
-    string makeDecision(double moneyInThePot, int minimumBet){
-       double oddsOfWinningHands[8]; //straight flush, 4 of a kind, full house, flush,straight, 3 of a kind, 2 pair, pair
-       string decisionForEachHand[8];
-       
-       oddsOfWinningHands[0] = straightFlushOdds();
-       oddsOfWinningHands[1] = fourOAKOdds();
-       oddsOfWinningHands[2] = fullHouseOdds();
-       oddsOfWinningHands[3] = flushOdds();
-       oddsOfWinningHands[4] = straightOdds();
-       oddsOfWinningHands[5] = threeOAKOdds();
-       oddsOfWinningHands[6] = twoPairOdds();
-       oddsOfWinningHands[7] = pairOdds();
-       
-       //work out odds offered by the ratio of money in the pot to the minimum Bet
-       double blah = moneyInThePot + minimumBet;
-       double oddsOffered = minimumBet / blah;
-       
-       
-//        for (int i = 0; i < 8; i++){
-//         if ((oddsOfWinningHands[i] - oddsOffered) >=  raiseThreshold){
-//            decisionForEachHand[i] = "Raise!";
-//             
-//         }
-//         else if ((oddsOfWinningHands - oddsOffered) >=  matchThreshold){
-//             decisionForEachHand[i] = "MatchBet";
-//         }
-//             decisionForEachHand[i] = "Fold:(";
-//     }
-}
-
-    //YOU NEED TO FIX THIS - YOU HAVE THE CHANCE OF GETTING A HAND BUT HAVING A PAIR IS NOT THE SAME AS HAVING A WINNING HAND.
-   
+//     string makeDecision(double moneyInThePot, int minimumBet){
+//        double oddsOfWinningHands[8]; //straight flush, 4 of a kind, full house, flush,straight, 3 of a kind, 2 pair, pair
+//        string decisionForEachHand[8];
+//        
+//        oddsOfWinningHands[0] = straightFlushOdds();
+//        oddsOfWinningHands[1] = fourOAKOdds();
+//        oddsOfWinningHands[2] = fullHouseOdds();
+//        oddsOfWinningHands[3] = flushOdds();
+//        oddsOfWinningHands[4] = straightOdds();
+//        oddsOfWinningHands[5] = threeOAKOdds();
+//        oddsOfWinningHands[6] = twoPairOdds();
+//        oddsOfWinningHands[7] = pairOdds();
+//        
+//        //work out odds offered by the ratio of money in the pot to the minimum Bet
+//        double blah = moneyInThePot + minimumBet;
+//        double oddsOffered = minimumBet / blah;
+//        
+//        
+// //        for (int i = 0; i < 8; i++){
+// //         if ((oddsOfWinningHands[i] - oddsOffered) >=  raiseThreshold){
+// //            decisionForEachHand[i] = "Raise!";
+// //             
+// //         }
+// //         else if ((oddsOfWinningHands - oddsOffered) >=  matchThreshold){
+// //             decisionForEachHand[i] = "MatchBet";
+// //         }
+// //             decisionForEachHand[i] = "Fold:(";
+// //     }
+// }
+// 
+//     //YOU NEED TO FIX THIS - YOU HAVE THE CHANCE OF GETTING A HAND BUT HAVING A PAIR IS NOT THE SAME AS HAVING A WINNING HAND.
+//    
+    
 };
 
 class Worf : public Player{
@@ -545,8 +664,11 @@ int main(){
     //check
     worf->getVisibleCards(numberOfCardsOnTheTable, d.numberOfCardsInDeck, cardsOnTheTable);
     
-    worf->flushOdds();
-    worf->calculateMultiples();
+    worf->orderVisibleCardsForStraight();
+    
+    worf->getCurrentHand(numberOfCardsOnTheTable, d.numberOfCardsInDeck, cardsOnTheTable);
+    //worf->flushOdds();
+    //worf->calculateMultiples();
     
 }
 
